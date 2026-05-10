@@ -21,7 +21,7 @@ TELEGRAM_CHAT_ID = getenv("TELEGRAM_CHAT_ID")
 FEEDS_FILE = Path("feeds.txt")
 SEEN_FILE = Path("seen.json")
 BLACKLIST_FILE = Path("blacklist.txt")
-CHECK_INTERVAL_SECONDS = 30
+CHECK_INTERVAL_SECONDS = 1800  # 30 minutes
 MAX_MESSAGE_LENGTH = 4096
 USER_AGENT = "rss-telegram-bot/1.0"
 
