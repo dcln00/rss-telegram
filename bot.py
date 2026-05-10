@@ -100,6 +100,14 @@ def get_published_time(entry: feedparser.FeedParserDict) -> str:
     return dt.strftime("%b %d, %Y at %H:%M UTC")
 
 
+def is_published_today(entry: feedparser.FeedParserDict) -> bool:
+    time_struct = entry.get("published_parsed") or entry.get("updated_parsed")
+    if not time_struct:
+        return False
+    dt = datetime.fromtimestamp(timegm(time_struct), tz=timezone.utc)
+    return dt.date() == datetime.now(tz=timezone.utc).date()
+
+
 def format_messages(new_items: dict[str, list[dict]]) -> list[str]:
     messages: list[str] = []
     current = ""
@@ -165,6 +173,10 @@ async def check_feeds(bot: Bot) -> None:
             if not entry_id or entry_id in seen:
                 continue
 
+            has_date = entry.get("published_parsed") or entry.get("updated_parsed")
+            if has_date and not is_published_today(entry):
+                continue
+
             title = entry.get("title", "")
             if blacklist and any(word in title.lower() for word in blacklist):
                 log.info("Blocked: %s (matched blacklist)", title)
@@ -174,8 +186,12 @@ async def check_feeds(bot: Bot) -> None:
             if feed_title not in new_items:
                 new_items[feed_title] = []
 
+            title = entry.get("title", "Untitled")
+            if not has_date:
+                title = f"** {title}"
+
             new_items[feed_title].append({
-                "title": entry.get("title", "Untitled"),
+                "title": title,
                 "link": entry.get("link", ""),
                 "excerpt": get_excerpt(entry),
                 "published": get_published_time(entry),
