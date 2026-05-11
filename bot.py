@@ -233,6 +233,11 @@ async def main() -> None:
 
     log.info("Bot started. Checking feeds every %d seconds.", CHECK_INTERVAL_SECONDS)
 
+    try:
+        await send_message(bot, "Activating RSS")
+    except Exception:
+        log.exception("Failed to send startup message")
+
     while not stop_event.is_set():
         await check_feeds(bot)
         try:
